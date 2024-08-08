@@ -73,7 +73,7 @@ def formula_predict(distance, travel_time, temperature, weather_condition, area_
     weather_adjustment = 2000 if weather_condition == 'rainy' else 0
     area_adjustment = 5000 if area_request == 'high_demand' else -1000 if area_request == 'low_demand' else 0
     temperature_penalty = abs(temperature - OPTIMAL_TEMPERATURE) * 1000
-    price = INITIAL_PRICE + (distance * 500) + (
+    price = INITIAL_PRICE + (distance * 2500) + (
                 travel_time * 200) + temperature_penalty + weather_adjustment + area_adjustment
     return price
 

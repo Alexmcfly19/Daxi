@@ -77,10 +77,10 @@ def formula_predict(distance, travel_time, temperature, weather_condition, area_
 
     # Apply linear growth within the range, exponential growth outside the range
     if temp_deviation <= LINEAR_RANGE:
-        temperature_penalty = temp_deviation * 1000  # Linear growth: 1000 units per degree within the range
+        temperature_penalty = temp_deviation * 500  # Linear growth: 1000 units per degree within the range
     else:
-        temperature_penalty = (LINEAR_RANGE * 1000) + (
-                    np.exp(temp_deviation - LINEAR_RANGE) * 100)  # Exponential growth outside the range
+        temperature_penalty = (LINEAR_RANGE * 100) + (
+                    np.log(temp_deviation - LINEAR_RANGE) * 5000)  # Exponential growth outside the range
 
     price = INITIAL_PRICE + (distance * 2500) + (
                 travel_time * 200) + temperature_penalty + weather_adjustment + area_adjustment
@@ -106,10 +106,10 @@ def train_model():
     def calculate_temperature_penalty(temp):
         temp_deviation = abs(temp - OPTIMAL_TEMPERATURE)
         if temp_deviation <= LINEAR_RANGE:
-            return temp_deviation * 1000  # Linear growth within the range
+            return temp_deviation * 500  # Linear growth within the range
         else:
-            return (LINEAR_RANGE * 1000) + (
-                        np.exp(temp_deviation - LINEAR_RANGE) * 100)  # Exponential growth outside the range
+            return (LINEAR_RANGE * 100) + (
+                        np.log(temp_deviation - LINEAR_RANGE) * 5000)  # Exponential growth outside the range
 
     data['temperature_penalty'] = data['temperature'].apply(calculate_temperature_penalty)
 
@@ -158,10 +158,10 @@ async def predict(data: Data):
         # Calculate temperature penalty
         temp_deviation = abs(temperature - OPTIMAL_TEMPERATURE)
         if temp_deviation <= LINEAR_RANGE:
-            temperature_penalty = temp_deviation * 1000  # Linear growth within the range
+            temperature_penalty = temp_deviation * 500  # Linear growth within the range
         else:
-            temperature_penalty = (LINEAR_RANGE * 1000) + (
-                        np.exp(temp_deviation - LINEAR_RANGE) * 100)  # Exponential growth outside the range
+            temperature_penalty = (LINEAR_RANGE * 100) + (
+                        np.log(temp_deviation - LINEAR_RANGE) * 5000)  # Exponential growth outside the range
 
         features = [[distance, travel_time, temperature_penalty, weather_clear, weather_rainy, area_high_demand,
                      area_low_demand]]

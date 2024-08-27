@@ -6,10 +6,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 import atexit
-
+import numpy as np
 INITIAL_PRICE = 8000  # Initial fixed cost for every trip
 OPTIMAL_TEMPERATURE = 18  # Optimal temperature in degrees Celsius
-
+LINEAR_RANGE = 5
 
 # Database setup
 def setup_database():
@@ -72,7 +72,16 @@ class Data(BaseModel):
 def formula_predict(distance, travel_time, temperature, weather_condition, area_request):
     weather_adjustment = 2000 if weather_condition == 'rainy' else 0
     area_adjustment = 5000 if area_request == 'high_demand' else -1000 if area_request == 'low_demand' else 0
-    temperature_penalty = abs(temperature - OPTIMAL_TEMPERATURE) * 1000
+
+    temp_deviation = abs(temperature - OPTIMAL_TEMPERATURE)
+
+    # Apply linear growth within the range, exponential growth outside the range
+    if temp_deviation <= LINEAR_RANGE:
+        temperature_penalty = temp_deviation * 1000  # Linear growth: 1000 units per degree within the range
+    else:
+        temperature_penalty = (LINEAR_RANGE * 1000) + (
+                    np.exp(temp_deviation - LINEAR_RANGE) * 100)  # Exponential growth outside the range
+
     price = INITIAL_PRICE + (distance * 2500) + (
                 travel_time * 200) + temperature_penalty + weather_adjustment + area_adjustment
     return price
@@ -92,7 +101,17 @@ def train_model():
 
     # Preprocess data
     data = pd.get_dummies(data, columns=['weather_condition', 'area_request'])
-    data['temperature_penalty'] = abs(data['temperature'] - OPTIMAL_TEMPERATURE) * 1000
+
+    # Calculate the temperature penalty with linear and exponential growth
+    def calculate_temperature_penalty(temp):
+        temp_deviation = abs(temp - OPTIMAL_TEMPERATURE)
+        if temp_deviation <= LINEAR_RANGE:
+            return temp_deviation * 1000  # Linear growth within the range
+        else:
+            return (LINEAR_RANGE * 1000) + (
+                        np.exp(temp_deviation - LINEAR_RANGE) * 100)  # Exponential growth outside the range
+
+    data['temperature_penalty'] = data['temperature'].apply(calculate_temperature_penalty)
 
     # Extract features and target variable
     features = data[['distance', 'travel_time', 'temperature_penalty',
@@ -135,7 +154,14 @@ async def predict(data: Data):
         weather_rainy = 1 if weather_condition == 'rainy' else 0
         area_high_demand = 1 if area_request == 'high_demand' else 0
         area_low_demand = 1 if area_request == 'low_demand' else 0
-        temperature_penalty = abs(temperature - OPTIMAL_TEMPERATURE) * 1000
+
+        # Calculate temperature penalty
+        temp_deviation = abs(temperature - OPTIMAL_TEMPERATURE)
+        if temp_deviation <= LINEAR_RANGE:
+            temperature_penalty = temp_deviation * 1000  # Linear growth within the range
+        else:
+            temperature_penalty = (LINEAR_RANGE * 1000) + (
+                        np.exp(temp_deviation - LINEAR_RANGE) * 100)  # Exponential growth outside the range
 
         features = [[distance, travel_time, temperature_penalty, weather_clear, weather_rainy, area_high_demand,
                      area_low_demand]]

@@ -105,7 +105,6 @@ def formula_predict(distance, travel_time, temperature, weather_condition, area_
     return price
 
 
-
 # Train model
 model = None
 trained_on_data_count = 0

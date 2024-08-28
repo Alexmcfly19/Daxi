@@ -151,7 +151,6 @@ def train_model():
 
     return model
 
-
 model = train_model()
 
 @app.post('/predict')

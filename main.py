@@ -158,7 +158,7 @@ async def predict(data: Data):
     travel_time = data.travel_time
     area_request = data.area_request
     city = data.city  # Assume the input data model has a 'city' field
-
+    save=data.save
     # Fetch weather data using the city name
     try:
         temperature, weather_condition = get_weather(city)
@@ -192,6 +192,11 @@ async def predict(data: Data):
         else:
             raise HTTPException(status_code=400, detail="Model not trained. Add data and retrain the model.")
 
+    if save:
+        insert_data(data.distance, data.travel_time, data.temperature, data.weather_condition, data.area_request,
+                    data.price)
+        global model
+        model = train_model()
     return {'predicted_price': prediction}
 
 

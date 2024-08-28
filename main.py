@@ -109,7 +109,6 @@ def formula_predict(distance, travel_time, temperature, weather_condition, area_
 model = None
 trained_on_data_count = 0
 
-
 def train_model():
     global trained_on_data_count
     data = fetch_data()

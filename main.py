@@ -154,7 +154,6 @@ def train_model():
 
 model = train_model()
 
-
 @app.post('/predict')
 async def predict(data: Data):
     distance = data.distance

@@ -80,9 +80,11 @@ app = FastAPI()
 class Data(BaseModel):
     distance: float
     travel_time: float
-    city: str  # New field for city name
+    city: str  # Field for city name
     area_request: str
-    price: float = None  # Optional for prediction
+    save: bool = False  # New field to decide whether to save the prediction
+    price: float = None  # Optional for inserting data directly
+
 
 
 
@@ -193,10 +195,7 @@ async def predict(data: Data):
             raise HTTPException(status_code=400, detail="Model not trained. Add data and retrain the model.")
 
     if save:
-        insert_data(data.distance, data.travel_time, data.temperature, data.weather_condition, data.area_request,
-                    data.price)
-        global model
-        model = train_model()
+        insert_data(distance, travel_time, temperature, weather_condition, area_request, prediction)
     return {'predicted_price': prediction}
 
 
